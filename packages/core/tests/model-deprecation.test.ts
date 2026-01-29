@@ -26,8 +26,8 @@ describe("Model format deprecation", () => {
     it("includes example of provider/model format", () => {
       const error = new UnsupportedModelError(["gpt-4o"]);
 
-      // Should provide an example like openai/gpt-4o
-      expect(error.message).toMatch(/openai\/gpt-4o|provider\/model/i);
+      // Should provide an example like openai/gpt-5 or anthropic/claude-sonnet-4
+      expect(error.message).toMatch(/openai\/gpt-5|anthropic\/claude-sonnet-4|provider\/model/i);
     });
 
     it("works with feature parameter", () => {
@@ -79,7 +79,7 @@ describe("Model format deprecation", () => {
       // Should mention the provider/model format
       expect(message).toContain("provider/model");
       // Should give an example
-      expect(message).toContain("openai/gpt-4o");
+      expect(message).toContain("openai/gpt-5");
     });
 
     it("returns OpenAIClient for legacy OpenAI model names", () => {
@@ -129,11 +129,16 @@ describe("Model format deprecation", () => {
       const logger = (line: LogLine) => logs.push(line);
       const provider = new LLMProvider(logger);
 
+      let caughtError: Error | null = null;
       try {
         provider.getClient("some-unknown-model" as any, mockClientOptions);
       } catch (error) {
-        expect((error as Error).message).toContain("provider/model");
+        caughtError = error as Error;
       }
+
+      // Fail-fast: ensure an error was thrown
+      expect(caughtError).not.toBeNull();
+      expect(caughtError!.message).toContain("provider/model");
     });
 
     it("throws UnsupportedAISDKModelProviderError for invalid provider in provider/model format", () => {
@@ -155,18 +160,23 @@ describe("Model format deprecation", () => {
       const logger = (line: LogLine) => logs.push(line);
       const provider = new LLMProvider(logger);
 
+      let caughtError: Error | null = null;
       try {
         provider.getClient(
           "invalid-provider/some-model" as any,
           mockClientOptions,
         );
       } catch (error) {
-        const message = (error as Error).message;
-        // Should list valid providers
-        expect(message).toContain("openai");
-        expect(message).toContain("anthropic");
-        expect(message).toContain("google");
+        caughtError = error as Error;
       }
+
+      // Fail-fast: ensure an error was thrown
+      expect(caughtError).not.toBeNull();
+      const message = caughtError!.message;
+      // Should list valid providers
+      expect(message).toContain("openai");
+      expect(message).toContain("anthropic");
+      expect(message).toContain("google");
     });
   });
 
