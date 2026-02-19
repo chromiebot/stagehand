@@ -616,6 +616,57 @@ await page.setViewportSize(
   **Default:** `1`
 </ParamField>
 
+## HTTP Headers
+
+### setExtraHTTPHeaders()
+
+Set additional HTTP headers to be sent with every request from this page.
+
+```typescript
+await page.setExtraHTTPHeaders(headers: Record<string, string>): Promise<void>
+```
+
+<ParamField path="headers" type="Record<string, string>" required>
+  An object containing header name-value pairs. These headers are merged with (but take precedence over) headers set via other means.
+
+  Pass an empty object `{}` to clear any previously set extra headers.
+</ParamField>
+
+This method:
+- Sends the specified headers with every HTTP request made by the page
+- Merges with existing headers (extra headers take precedence on conflict)
+- Applies to all requests including XHR, fetch, and resource loading
+- Persists until explicitly cleared or the page is closed
+
+**Example - Set authentication headers:**
+
+```typescript
+await page.setExtraHTTPHeaders({
+  'Authorization': 'Bearer token123',
+  'X-Custom-Header': 'custom-value'
+});
+
+// All subsequent requests will include these headers
+await page.goto('https://api.example.com/protected');
+```
+
+**Example - Set multiple headers for API access:**
+
+```typescript
+await page.setExtraHTTPHeaders({
+  'X-API-Key': 'your-api-key',
+  'X-Request-ID': 'unique-request-id',
+  'Accept-Language': 'en-US'
+});
+```
+
+**Example - Clear extra headers:**
+
+```typescript
+// Clear all extra headers
+await page.setExtraHTTPHeaders({});
+```
+
 ## Wait Methods
 
 ### waitForLoadState()
@@ -918,6 +969,36 @@ await page.setViewportSize(375, 667, {
 
 // Then take a screenshot at this size
 const screenshot = await page.screenshot();
+```
+
+</Tab>
+<Tab title="HTTP Headers">
+
+```typescript
+// Set custom headers for authenticated requests
+await page.setExtraHTTPHeaders({
+  'Authorization': 'Bearer your-token-here',
+  'X-API-Key': 'your-api-key'
+});
+
+// Navigate to a protected resource
+await page.goto("https://api.example.com/data");
+
+// All subsequent requests include the headers
+await page.evaluate(async () => {
+  // This fetch will include the Authorization header
+  const response = await fetch("/api/protected");
+  return response.json();
+});
+
+// Update headers for a different context
+await page.setExtraHTTPHeaders({
+  'Authorization': 'Bearer new-token',
+  'X-Request-ID': crypto.randomUUID()
+});
+
+// Clear all extra headers
+await page.setExtraHTTPHeaders({});
 ```
 
 </Tab>
