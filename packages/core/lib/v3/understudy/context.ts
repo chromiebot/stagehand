@@ -58,6 +58,7 @@ export class V3Context {
   private _pageOrder: TargetId[] = [];
   private pendingCreatedTargetUrl = new Map<TargetId, string>();
   private readonly initScripts: string[] = [];
+  private extraHTTPHeaders: Record<string, string> = {};
 
   private installTargetSessionListeners(session: CDPSessionLike): void {
     const sessionId = session.id;
@@ -275,6 +276,22 @@ export class V3Context {
   }
 
   /**
+   * Set extra HTTP headers to be sent with every request made by pages in this context.
+   * These headers will be applied to all existing pages and any pages created after this call.
+   * Calling this method again will replace any previously set headers.
+   * Pass an empty object to clear all extra headers.
+   *
+   * @param headers - A record of header name to header value pairs
+   */
+  public async setExtraHTTPHeaders(
+    headers: Record<string, string>,
+  ): Promise<void> {
+    this.extraHTTPHeaders = { ...headers };
+    const pages = this.pages();
+    await Promise.all(pages.map((page) => page.setExtraHTTPHeaders(headers)));
+  }
+
+  /**
    * Return top-level `Page`s (oldest → newest). OOPIF targets are not included.
    */
   pages(): Page[] {
@@ -300,6 +317,15 @@ export class V3Context {
     }
     for (const source of this.initScripts) {
       await page.registerInitScript(source);
+    }
+  }
+
+  /**
+   * Apply any context-level extra HTTP headers to a newly created page.
+   */
+  private async applyExtraHTTPHeadersToPage(page: Page): Promise<void> {
+    if (Object.keys(this.extraHTTPHeaders).length > 0) {
+      await page.setExtraHTTPHeaders(this.extraHTTPHeaders);
     }
   }
 
@@ -584,6 +610,8 @@ export class V3Context {
         await this.applyInitScriptsToPage(page, {
           seedOnly: scriptsInstalled,
         });
+        // Apply any context-level extra HTTP headers to the new page.
+        await this.applyExtraHTTPHeadersToPage(page);
 
         return;
       }

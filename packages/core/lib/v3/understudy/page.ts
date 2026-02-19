@@ -182,6 +182,30 @@ export class Page {
     this.initScripts.push(source);
   }
 
+  /**
+   * Set extra HTTP headers to be sent with every request from this page.
+   * Uses CDP Network.setExtraHTTPHeaders to configure headers on all sessions.
+   */
+  public async setExtraHTTPHeaders(
+    headers: Record<string, string>,
+  ): Promise<void> {
+    const tasks: Array<Promise<unknown>> = [];
+    // Apply to main session
+    tasks.push(
+      this.mainSession
+        .send("Network.setExtraHTTPHeaders", { headers })
+        .catch(() => {}),
+    );
+    // Apply to all other sessions (OOPIFs)
+    for (const session of this.sessions.values()) {
+      if (session === this.mainSession) continue;
+      tasks.push(
+        session.send("Network.setExtraHTTPHeaders", { headers }).catch(() => {}),
+      );
+    }
+    await Promise.all(tasks);
+  }
+
   // --- Optional visual cursor overlay management ---
   private cursorEnabled = false;
   private async ensureCursorScript(): Promise<void> {

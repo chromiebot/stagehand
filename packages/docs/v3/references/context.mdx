@@ -136,6 +136,46 @@ await context.addInitScript(() => {
  });
 ```
 
+### setExtraHTTPHeaders()
+
+Set extra HTTP headers to be sent with every request made by pages in this context.
+
+```typescript
+await context.setExtraHTTPHeaders(headers: Record<string, string>): Promise<void>
+```
+
+<ParamField path="headers" type="Record<string, string>" required>
+  An object containing header name-value pairs. Pass an empty object `{}` to clear
+  all previously set extra headers.
+</ParamField>
+
+This method:
+- Applies headers to all currently open pages immediately
+- Automatically applies headers to any pages created after calling `setExtraHTTPHeaders()`
+- Replaces any previously set headers when called again (headers are not merged)
+- Useful for authentication tokens, custom tracking headers, or API versioning
+
+```typescript
+import { Stagehand } from "@browserbasehq/stagehand";
+
+const stagehand = new Stagehand({ env: "LOCAL" });
+await stagehand.init();
+const context = stagehand.context;
+
+// Set custom headers for all requests
+await context.setExtraHTTPHeaders({
+  "Authorization": "Bearer my-token",
+  "X-Custom-Header": "custom-value",
+});
+
+// Navigate - headers will be sent with all requests
+const page = context.pages()[0];
+await page.goto("https://api.example.com/data");
+
+// Clear all extra headers
+await context.setExtraHTTPHeaders({});
+```
+
 ### close()
 
 Close the browser context and all associated pages.
@@ -436,6 +476,11 @@ interface V3Context {
   pages(): Page[];
   activePage(): Page | undefined;
   setActivePage(page: Page): void;
+  addInitScript<Arg>(
+    script: string | { path?: string; content?: string } | ((arg: Arg) => unknown),
+    arg?: Arg
+  ): Promise<void>;
+  setExtraHTTPHeaders(headers: Record<string, string>): Promise<void>;
   close(): Promise<void>;
 }
 ```
