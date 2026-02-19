@@ -1336,6 +1336,34 @@ export class Page {
   }
 
   /**
+   * Set additional HTTP headers to be sent with every request from this page.
+   * These headers are merged with (but take precedence over) headers set via
+   * other means. The extra headers are sent with every HTTP request.
+   *
+   * Passing an empty object clears any previously set extra headers.
+   *
+   * @param headers - Object containing header name-value pairs to send with each request.
+   *
+   * @example
+   * // Set custom headers for authentication
+   * await page.setExtraHTTPHeaders({
+   *   'Authorization': 'Bearer token123',
+   *   'X-Custom-Header': 'custom-value'
+   * });
+   *
+   * @example
+   * // Clear all extra headers
+   * await page.setExtraHTTPHeaders({});
+   */
+  @logAction("Page.setExtraHTTPHeaders")
+  async setExtraHTTPHeaders(headers: Record<string, string>): Promise<void> {
+    await this.mainSession.send("Network.enable").catch(() => {});
+    await this.mainSession.send("Network.setExtraHTTPHeaders", {
+      headers,
+    } as Protocol.Network.SetExtraHTTPHeadersRequest);
+  }
+
+  /**
    * Click at absolute page coordinates (CSS pixels).
    * Dispatches mouseMoved → mousePressed → mouseReleased via CDP Input domain
    * on the top-level page target's session. Coordinates are relative to the
