@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getApiUrlForRegion, REGION_API_URLS } from "../../lib/v3/api";
+import { getApiUrlForRegion, REGION_API_URLS } from "../../lib/v3/api.js";
 
 describe("Multi-region API URL mapping", () => {
   describe("REGION_API_URLS constant", () => {
