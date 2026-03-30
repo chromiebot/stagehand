@@ -31,6 +31,30 @@ import { v7 as uuidv7 } from "uuid";
 export type ResponseInputItem = AnthropicMessage | AnthropicToolResult;
 
 /**
+ * Default thinking budget for adaptive thinking on 4.6 models.
+ * Medium effort is the sweet spot for computer use tasks - they are more
+ * perceptual than logically complex and typically don't benefit from high
+ * thinking effort.
+ */
+export const MEDIUM_THINKING_BUDGET = 10240;
+
+/**
+ * Models that support adaptive thinking with medium effort by default.
+ * These are Claude 4.6+ models optimized for computer use.
+ */
+const ADAPTIVE_THINKING_MODELS = ["claude-sonnet-4-6", "claude-opus-4-6"];
+
+/**
+ * Check if the model supports adaptive thinking with default enabled.
+ */
+function isAdaptiveThinkingModel(modelName: string): boolean {
+  const normalizedModel = modelName.includes("/")
+    ? modelName.split("/")[1]
+    : modelName;
+  return ADAPTIVE_THINKING_MODELS.includes(normalizedModel);
+}
+
+/**
  * Client for Anthropic's Computer Use API
  * This implementation uses the official Anthropic Messages API for Computer Use
  */
@@ -60,13 +84,20 @@ export class AnthropicCUAClient extends AgentClient {
       (clientOptions?.apiKey as string) || process.env.ANTHROPIC_API_KEY || "";
     this.baseURL = (clientOptions?.baseURL as string) || undefined;
 
-    // Get thinking budget if specified
-    if (
-      clientOptions?.thinkingBudget &&
-      typeof clientOptions.thinkingBudget === "number"
-    ) {
-      this.thinkingBudget = clientOptions.thinkingBudget;
+    // Configure thinking budget:
+    // - If explicitly set to 0, disable thinking
+    // - If explicitly set to a positive number, use that value
+    // - If not set and model is 4.6+, enable with medium budget (adaptive thinking)
+    // - If not set and model is not 4.6, disable thinking
+    if (typeof clientOptions?.thinkingBudget === "number") {
+      // Explicit value: 0 means disable, positive means use that budget
+      this.thinkingBudget =
+        clientOptions.thinkingBudget > 0 ? clientOptions.thinkingBudget : null;
+    } else if (isAdaptiveThinkingModel(modelName)) {
+      // 4.6 models get adaptive thinking with medium effort by default
+      this.thinkingBudget = MEDIUM_THINKING_BUDGET;
     }
+    // else: thinkingBudget stays null (disabled)
 
     // Store client options for reference
     this.clientOptions = {
