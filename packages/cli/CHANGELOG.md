@@ -1,5 +1,41 @@
 # @browserbasehq/browse-cli
 
+## 0.5.0
+
+### Minor Changes
+
+- [#1945](https://github.com/browserbase/stagehand/pull/1945) [`2df4b01`](https://github.com/browserbase/stagehand/commit/2df4b01cbbbb459d4495dfef0a5cc46993426278) Thanks [@shrey150](https://github.com/shrey150)! - Default `browse env local` back to an isolated browser, add `--auto-connect` as the opt-in path for attaching to an existing debuggable Chrome, and keep explicit CDP attach via `browse env local <port|url>`.
+
+## 0.4.2
+
+### Patch Changes
+
+- [#1907](https://github.com/browserbase/stagehand/pull/1907) [`3917df4`](https://github.com/browserbase/stagehand/commit/3917df4851673792ecc2644e2a50dac8996bbeb0) Thanks [@derekmeegan](https://github.com/derekmeegan)! - Add `browse get markdown [selector]` command to convert page HTML to markdown. Defaults to body content, supports optional selector for specific elements. Uses node-html-markdown for high-quality conversion with links, tables, and code blocks preserved.
+
+## 0.4.1
+
+### Patch Changes
+
+- [#1911](https://github.com/browserbase/stagehand/pull/1911) [`56d7b9f`](https://github.com/browserbase/stagehand/commit/56d7b9f5cc6a2d492f6d243818dc3024ef5f61d8) Thanks [@derekmeegan](https://github.com/derekmeegan)! - Fix invalid metadata key by using underscore instead of hyphen for browse_cli session metadata
+
+## 0.4.0
+
+### Minor Changes
+
+- [#1889](https://github.com/browserbase/stagehand/pull/1889) [`e81dde7`](https://github.com/browserbase/stagehand/commit/e81dde715786d70e65524c8b7ce10e00a909efd9) Thanks [@shrey150](https://github.com/shrey150)! - Add --connect flag to attach to an existing Browserbase session by ID
+
+- [#1886](https://github.com/browserbase/stagehand/pull/1886) [`bd2a9cf`](https://github.com/browserbase/stagehand/commit/bd2a9cfcad6e7afa3168ae926243313a81260769) Thanks [@shrey150](https://github.com/shrey150)! - browse env local now auto-discovers existing Chrome instances with remote debugging enabled, attaching to them instead of always launching an isolated browser. Falls back to isolated launch when no debuggable Chrome is found. Added --isolated flag, positional CDP target argument, and --ws now accepts bare port numbers.
+
+### Patch Changes
+
+- [#1890](https://github.com/browserbase/stagehand/pull/1890) [`6c89565`](https://github.com/browserbase/stagehand/commit/6c89565cd17511c5bf80850a12a84887d8440644) Thanks [@shrey150](https://github.com/shrey150)! - Add browse-cli metadata to Browserbase sessions created through the CLI
+
+- [#1887](https://github.com/browserbase/stagehand/pull/1887) [`6e3c14b`](https://github.com/browserbase/stagehand/commit/6e3c14bd8c98751f3149ab07b440632a9ce7b4bd) Thanks [@shrey150](https://github.com/shrey150)! - fix: clear cached browser state when CDP connection dies, preventing "awaitActivePage: no page available" errors when daemon outlives its browser
+
+## 0.3.0
+
+This version was published to npm with a broken `workspace:*` dependency and is not installable. The pending browse-cli changesets remain in the repo so the next installable release can include those changes normally.
+
 ## 0.2.0
 
 ### Minor Changes
