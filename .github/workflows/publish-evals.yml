@@ -23,21 +23,15 @@ on:
         default: stagehand:evals:experiments
         type: string
       write_experiment_key:
-        description: Also write <experiment_key_prefix>:<experiment_id>.
+        description: Also write <experiment_key_prefix>:<experiment_id>. (true/false)
         required: false
         default: "true"
-        type: choice
-        options:
-          - "true"
-          - "false"
+        type: string
       dry_run:
-        description: Fetch and render payload without writing to Upstash.
+        description: Fetch and render payload without writing to Upstash. (true/false)
         required: false
         default: "false"
-        type: choice
-        options:
-          - "true"
-          - "false"
+        type: string
 
 permissions:
   contents: read
@@ -87,11 +81,11 @@ jobs:
             --out evals-ui-data.json
           )
 
-          if [[ "$WRITE_EXPERIMENT_KEY" != "true" ]]; then
+          if [[ ! "$WRITE_EXPERIMENT_KEY" =~ ^(true|1|1\.0)$ ]]; then
             args+=(--no-experiment-key)
           fi
 
-          if [[ "$DRY_RUN" == "true" ]]; then
+          if [[ "$DRY_RUN" =~ ^(true|1|1\.0)$ ]]; then
             args+=(--dry-run)
           fi
 
