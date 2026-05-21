@@ -25,13 +25,19 @@ on:
       write_experiment_key:
         description: Also write <experiment_key_prefix>:<experiment_id>.
         required: false
-        default: true
-        type: boolean
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
       dry_run:
         description: Fetch and render payload without writing to Upstash.
         required: false
-        default: false
-        type: boolean
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
 
 permissions:
   contents: read
